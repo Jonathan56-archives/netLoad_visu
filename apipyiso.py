@@ -1,9 +1,11 @@
 from __future__ import division
 from pyiso import client_factory
 import matplotlib.pyplot as plt
+from clint.textui import colored
 import seaborn
 import datetime
 import pytz
+import sys
 
 
 def get_duck_curve(client, start_at, end_at, timeZone, loadScale=1, windScale=1, solarScale=1):
@@ -67,14 +69,11 @@ def get_solar_wind_load(client, start_at, end_at):
     data = client.get_generation(start_at=start_at, end_at=end_at)
     timeSolar = []
     solar = {}
-    solarth = {}
     wind = {}
     for eachData in data:
         if eachData['fuel_name'] == 'solarpv':
             timeSolar.append(eachData['timestamp'])
             solar[timeSolar[-1]] = eachData['gen_MW']
-        if eachData['fuel_name'] == 'solarth':
-            solarth[eachData['timestamp']] = eachData['gen_MW']
         if eachData['fuel_name'] == 'wind':
             wind[eachData['timestamp']] = eachData['gen_MW']
 
@@ -93,8 +92,71 @@ def get_solar_wind_load(client, start_at, end_at):
             timeList.append(time)
     timeList.sort()
 
-    return timeList, solar, solarth, wind, load
+    return timeList, solar, wind, load
 
+
+def get_load_gen(client, start_at, end_at, categories=['solarpv', 'solarth', 'wind', 'load']):
+    """
+
+    Args:
+        client: pyiso client
+        start_at: start time
+        end_at: end time
+        categories: list of string (nuclear, biomass, biogas, thermal, ...)
+
+    Returns:
+        result: dictionnary of all the categories
+
+    """
+    # Get the result structure
+    result = {}
+    for category in categories:
+        result[category] = {}
+
+    # Get generation as a dictionnary {date: value}
+    count = 1
+    tryAgain = True
+    while tryAgain and count < 10:
+        try:
+            data = client.get_generation(start_at=start_at, end_at=end_at)
+        except:
+            print(colored.red(sys.exc_info()[0]))
+            break
+        if len(data) < 20:
+            count += 1
+            continue
+        print(colored.green("Retrieved gen for " + str(end_at.day) + '/' + str(end_at.month) + 
+            ' after ' + str(count) + ' try'))
+        for eachData in data:
+            for category in categories:
+                if eachData['fuel_name'] == category:
+                    result[category][eachData['timestamp']] = eachData['gen_MW']
+        tryAgain = False
+    if count == 10:
+        print('Warning missing data')
+
+    # Get load as a dictionnary {date: value}
+    count = 1
+    tryAgain = True
+    while tryAgain and count < 10:
+        try:
+            data = client.get_load(start_at=start_at, end_at=end_at)
+        except:
+            print(colored.red(sys.exc_info()[0]))
+            break       
+        if len(data) < 20:
+            count += 1
+            continue
+        print(colored.green("Retrieved load for " + str(end_at.day) + '/' + str(end_at.month) + 
+            ' after ' + str(count) + ' try'))
+        for eachData in data:
+            result['load'][eachData['timestamp']] = eachData['load_MW']
+        tryAgain = False
+    if count == 10:
+        print('Warning missing data')
+    
+    # Return a dict (category) of dict (date: value) or empty
+    return result
 
 def plot_duck_curve(time, duck):
     # Avoid frame around plot
