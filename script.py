@@ -13,9 +13,9 @@ import seaborn
 seaborn.set_style("whitegrid")
 
 # Input data
-year = 2015
+year = 2013
 
-for month in range(11, 12):
+for month in range(1, 13):
 	# Set variables
 	dayRange = monthrange(year, month)[1]
 	dayList = [index for index in range(1, dayRange+1)]
