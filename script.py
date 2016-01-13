@@ -13,7 +13,7 @@ import seaborn
 seaborn.set_style("whitegrid")
 
 # Input data
-year = 2013
+year = 2010
 
 for month in range(1, 13):
 	# Set variables
@@ -31,7 +31,7 @@ for month in range(1, 13):
 				result[category] = []
 		# Add one more day in the final result
 		result = getData.concatenate_day(result, temp)
-		time.sleep(2)
+		time.sleep(1)
 	 
 	# Save to csv
 	path = os.path.join(os.path.dirname(__file__), 'csv_result', str(year) + '-' + str(month) + '.csv')

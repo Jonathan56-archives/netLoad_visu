@@ -15,7 +15,8 @@ def get_daily_data(year, month, day, client):
     end = datetime.datetime(year, month, day, 23, 0, 0, 0, tz)
 
     # Result in UTC
-    result = apipyiso.get_load_gen(client, start, end)
+    result = apipyiso.get_load_gen(client, start, end, categories=['solar', 'wind', 'load'])
+    # result = apipyiso.get_load_gen(client, start, end)
 
     # Set timezone back to California --> change timestamp to datetime --> remove timezone
     for category in result:
@@ -45,6 +46,8 @@ def get_daily_data(year, month, day, client):
                 result[category][time] = replace_missing_value(result[category], time)
                 data[category].append(result[category][time])
                 missingData[category].append(time)
+            if isinstance(data[category][-1], basestring):
+                data[category][-1] = -1
     data['time'] = timeList
 
     # Merge solarpv and solarth into solar

@@ -3,6 +3,7 @@ from pyiso import client_factory
 import matplotlib.pyplot as plt
 from clint.textui import colored
 import seaborn
+import time
 import datetime
 import pytz
 import sys
@@ -135,6 +136,7 @@ def get_load_gen(client, start_at, end_at, categories=['solarpv', 'solarth', 'wi
     if count == 10:
         print('Warning missing data')
 
+    time.sleep(1)
     # Get load as a dictionnary {date: value}
     count = 1
     tryAgain = True
