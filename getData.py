@@ -24,7 +24,7 @@ def get_daily_data(year, month, day, client):
             try:
                 newTime = time.to_datetime().replace(tzinfo=pytz.utc).astimezone(tz).replace(tzinfo=None)
             except AttributeError:
-                newTime = time.replace(tzinfo=None)
+                newTime = time.replace(tzinfo=pytz.utc).astimezone(tz).replace(tzinfo=None)
             result[category][newTime] = result[category].pop(time)
 
     # Set desired output timestamp -- from here everything is in local time with no timezone
@@ -78,18 +78,6 @@ def replace_missing_value(dictio, time):
     count = 0
     while count < 4:
         count += 1
-        # # Try to pick the previous value
-        # try:
-        #     value = dictio[time - datetime.timedelta(hours=count)]
-        # except KeyError:
-        #     valid = False
-
-        # # It works let's return this value
-        # if valid:
-        #     break
-
-        # # Else let's pick the next value
-        # valid = True
         try:
             value = dictio[time + datetime.timedelta(hours=count)]
         except KeyError:

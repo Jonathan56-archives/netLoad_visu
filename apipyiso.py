@@ -114,49 +114,57 @@ def get_load_gen(client, start_at, end_at, categories=['solarpv', 'solarth', 'wi
     for category in categories:
         result[category] = {}
 
-    # Get generation as a dictionnary {date: value}
+    # Get generation as a dictionary {date: value}
     count = 1
+    maxTry = 10
     tryAgain = True
-    while tryAgain and count < 10:
+    while tryAgain and count < maxTry:
         try:
+            timeLib.sleep(1)
             data = client.get_generation(start_at=start_at, end_at=end_at)
         except:
             print(colored.red(sys.exc_info()[0]))
             break
-        if len(data) < 20:
+
+        # Incomplete data - if it's last try then let's just pick what we can
+        if len(data) < 20 and count < maxTry - 1:
             count += 1
             continue
-        print(colored.green("Retrieved gen for " + str(end_at.day) + '/' + str(end_at.month) + 
-            ' after ' + str(count) + ' try'))
+        print(colored.green("Retrieved gen for " + str(end_at.day) + '/' + str(end_at.month) +
+                            ' after ' + str(count) + ' try'))
+
         for eachData in data:
             for category in categories:
                 if eachData['fuel_name'] == category:
                     result[category][eachData['timestamp']] = eachData['gen_MW']
         tryAgain = False
-    if count == 10:
+    if count == maxTry - 1:
         print('Warning missing data')
 
-    time.sleep(1)
-    # Get load as a dictionnary {date: value}
+    # Get load as a dictionary {date: value}
     count = 1
     tryAgain = True
-    while tryAgain and count < 10:
+    while tryAgain and count < maxTry:
         try:
+            timeLib.sleep(1)
             data = client.get_load(start_at=start_at, end_at=end_at)
         except:
             print(colored.red(sys.exc_info()[0]))
-            break       
-        if len(data) < 20:
+            break
+
+        # Incomplete data - if it's last try then let's just pick what we can
+        if len(data) < 20 and count < maxTry - 1:
             count += 1
             continue
-        print(colored.green("Retrieved load for " + str(end_at.day) + '/' + str(end_at.month) + 
-            ' after ' + str(count) + ' try'))
+        print(colored.green("Retrieved load for " + str(end_at.day) + '/' + str(end_at.month) +
+                            ' after ' + str(count) + ' try'))
+
         for eachData in data:
             result['load'][eachData['timestamp']] = eachData['load_MW']
         tryAgain = False
-    if count == 10:
+    if count == maxTry - 1:
         print('Warning missing data')
-    
+
     # Return a dict (category) of dict (date: value) or empty
     return result
 
