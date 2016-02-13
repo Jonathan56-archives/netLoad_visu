@@ -13,7 +13,7 @@ import seaborn
 seaborn.set_style("whitegrid")
 
 # Input data
-year = 2010
+year = 2014
 
 for month in range(1, 13):
 	# Set variables

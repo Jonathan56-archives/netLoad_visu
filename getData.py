@@ -6,17 +6,17 @@ import apipyiso
 import os
 import csv
 import matplotlib.pyplot as plt
+import pdb
 
 
 def get_daily_data(year, month, day, client):
     # Grid manager input in local time zone
     tz = pytz.timezone('America/Los_Angeles')
     start = datetime.datetime(year, month, day, 10, 0, 0, 0, tz) - datetime.timedelta(days=1)
-    end = datetime.datetime(year, month, day, 23, 0, 0, 0, tz)
+    end = datetime.datetime(year, month, day, 23, 0, 0, 0, tz) + datetime.timedelta(hours=4)
 
     # Result in UTC
-    result = apipyiso.get_load_gen(client, start, end, categories=['solar', 'wind', 'load'])
-    # result = apipyiso.get_load_gen(client, start, end)
+    result = apipyiso.get_load_gen(client, start, end, categories=['solarth', 'solarpv', 'wind', 'load'])
 
     # Set timezone back to California --> change timestamp to datetime --> remove timezone
     for category in result:
